@@ -58,7 +58,7 @@ int main(int argc, char * argv[]){
           //Apply the image
           SDL_BlitSurface( gOpening, NULL, gScreenSurface, NULL );
 					SDL_UpdateWindowSurface( gWindow );
-					SDL_Delay(1000);
+					SDL_Delay(7000);
 			}
 		}
 		//clear splash image
@@ -74,7 +74,7 @@ for (size_t i = 0; i < WINDOWW; i+=15) {
 		DrawRectIntro(j,i);
 	}
 }
-SDL_Delay(2000);
+SDL_Delay(1000);
 //#########End intro ##########
 
 
