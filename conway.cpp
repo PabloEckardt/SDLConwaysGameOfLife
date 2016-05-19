@@ -38,8 +38,8 @@ Vector_Matrix initialize(){
 	for (size_t i = 0; i < ROWS; i++) {
 		Tuple_Vector tempVect;
 		for (size_t j = 0; j < COLS; j++) {
-			int num = ((i+j+i)/2)%2;
-			tuple < int,int,int,int > tempTup (num,0,0,0);
+			int num =  rand() % 3;
+			tuple < int,int,int,int > tempTup (num/2,0,0,0);
 			tempVect.push_back(tempTup);
 		}
 		Grid.push_back(tempVect);
@@ -61,16 +61,7 @@ Vector_Matrix initialize2(){
 	return Grid;
 	}
 
-
-int main(int argc, char * argv[]){
-	Vector_Matrix Grid = initialize();
-	Vector_Matrix NewGrid = initialize2();
-	printMatrix(Grid);
-	printf("\n" );
-	printMatrix(NewGrid);
-
-	//////////////////////////////////////////////////////////////////////////////
-
+Vector_Matrix update(Vector_Matrix NewGrid,Vector_Matrix Grid){
 	int i = 0;
 	int j = 0;
 	int liveNeighbors = 0;
@@ -85,9 +76,17 @@ int main(int argc, char * argv[]){
 			}
 		}
 	}
-	printf("\n" );
-	printMatrix(NewGrid);
+	return NewGrid;
+}
 
+int main(int argc, char * argv[]){
+	Vector_Matrix Grid = initialize();	// printMatrix(Grid);	// printf("\n" );
+	Vector_Matrix NewGrid = initialize2();	// printMatrix(NewGrid);
 
+while(true){
+	NewGrid = update(NewGrid,Grid);
+	Grid = NewGrid;
+	// printMatrix(Grid);
+}
 	return 1;
 }
