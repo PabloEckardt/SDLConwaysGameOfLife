@@ -1,16 +1,15 @@
-#include <SDL2/SDL.h>
-#include <stdio.h>
-#include <vector>
-#include <tuple>
-#include <cstdlib>
 
+#include "header.h"
+//## Constant variables and objects that need to be openly accessible ###
 using namespace std;
-int const ROWS = 66;
-int const COLS = 66;
-int const WINDOWX = 0;
-int const WINDOWY = 0;
-int const WINDOWW = 990;
-int const WINDOWH = 990;
+
+extern int const ROWS;
+extern int const COLS;
+extern int const WINDOWX;
+extern int const WINDOWY;
+extern int const WINDOWW;
+extern int const WINDOWH;
+
 //The window we'll be rendering to
 SDL_Window* gWindow = NULL;
 
@@ -23,165 +22,26 @@ SDL_Surface* gOpening = NULL;
 //The window renderer
 SDL_Renderer* gRenderer = NULL;
 
-typedef vector<vector< tuple<int,int,int,int> > > Vector_Matrix;
-typedef vector<tuple<int,int,int,int> >Tuple_Vector;
-int wrap(int n, int m) {
-    return (n<0 ? (m-(-n-1)%m)-1 : n%m);
-}
-int getNumLivingNeighbors(int row, int col,Vector_Matrix grid) {
-	int num = 0;
-	for (int e = row-1; e <= row+1; e++){
-		for (int i = col - 1; i <= col + 1; i++){
-			if (       get<0>(grid[wrap(e, COLS)][wrap(i, ROWS)])    ){ num += 1; }
-		}
-	}
-	if (get<0>(grid[row][col])){ num -= 1; }
-	// compute the number of living neighbors of the specified cell
-    return num;
-}
-void printMatrix(Vector_Matrix Grid){
-	for (size_t i = 0; i < ROWS; i++) {
-		for (size_t j = 0; j < COLS; j++) {
-			printf(" %d ",get<0>(Grid[i][j]));
-		}
-		printf("\n" );
-	}
-}
+//###### Function prototypes: #########
 
-Vector_Matrix initialize(){
-	Vector_Matrix Grid; // initialize the vector
-	///////////// initialize every sub vector and tuple inside the Matrix/////
-	for (size_t i = 0; i < ROWS; i++) {
-		Tuple_Vector tempVect;
-		for (size_t j = 0; j < COLS; j++) {
-			int num =  rand() % 3;
-			tuple < int,int,int,int > tempTup (num/2,0,0,0);
-			tempVect.push_back(tempTup);
-		}
-		Grid.push_back(tempVect);
-	}
-	return Grid;
-	}
+  int wrap(int n, int m); // wrap function to calculate the right row or column
+  //for cells that live on the edge of the grid, regardless of size.
 
-Vector_Matrix initialize2(){
-	Vector_Matrix Grid; // initialize the vector
-	///////////// initialize every sub vector and tuple inside the Matrix/////
-	for (size_t i = 0; i < ROWS; i++) {
-		Tuple_Vector tempVect;
-		for (size_t j = 0; j < COLS; j++) {
-			tuple < int,int,int,int > tempTup (0,0,0,0);
-			tempVect.push_back(tempTup);
-		}
-		Grid.push_back(tempVect);
-	}
-	return Grid;
-	}
+  int getNumLivingNeighbors(int row, int col,Vector_Matrix grid) ;
 
-Vector_Matrix update(Vector_Matrix NewGrid,Vector_Matrix Grid){
-	int i = 0;
-	int j = 0;
-	int liveNeighbors = 0;
-	for ( i = 0; i < ROWS; i++) {
-		for ( j = 0; j < COLS; j++) {
-			liveNeighbors = getNumLivingNeighbors(i,j,Grid);
-			if (liveNeighbors > 3 || liveNeighbors < 2 ){
-				get<0>(NewGrid[i][j]) = 0;
-			}
-			else if (liveNeighbors == 3){
-				get<0>(NewGrid[i][j]) = 1;
-			}
-		}
-	}
-	return NewGrid;
-}
+  Vector_Matrix initialize(); // initialize with basic random seed
+  Vector_Matrix initialize2(); // initialize an empty grid, not necessary but useful
+  Vector_Matrix update(Vector_Matrix NewGrid,Vector_Matrix Grid);//Takes an old grid
+                              //and generates a new grid based on the status of the cells
+  bool init();                //Initialize SDL2 components
+  bool loadMedia();           //Used to correctly load an image to the screen
+  void close();               // eliminate the elements created by loading SDL and the images
+  void DrawRectIntro(int i,int j); // Draw a rectangle for the introduction of the program.
+  void DrawLifeGrid(Vector_Matrix Grid); // Re-render the whole screen based on the information in a grid.
 
 
-//Starts up SDL and creates window
-bool init(){
-    //Initialization flag
-    bool success = true;
-    //Initialize SDL
-    if( SDL_Init( SDL_INIT_VIDEO ) < 0 ){
-        printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
-        success = false;
-    }
-    else {
-        //Create window
-        gWindow = SDL_CreateWindow( "SDL Conway", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOWW, WINDOWH, SDL_WINDOW_SHOWN );
-        if( gWindow == NULL ){
-            printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
-            success = false;
-        }
-        else{
-            //Get window surface
-            gScreenSurface = SDL_GetWindowSurface( gWindow );
-        }
-    }
-    return success;
-}
 
-//Loads media
-bool loadMedia(){
-    //Loading success flag
-    bool success = true;
 
-    //Load splash image
-    gOpening = SDL_LoadBMP( "Splash.bmp" );
-    if( gOpening == NULL )
-    {
-        printf( "Unable to load image %s! SDL Error: %s\n", "Splash.bmp", SDL_GetError() );
-        success = false;
-    }
-
-    return success;
-}
-//Frees media and shuts down SDL
-void close(){
-    //Deallocate surface
-    SDL_FreeSurface( gOpening );
-    gOpening = NULL;
-
-    //Destroy window
-    SDL_DestroyWindow( gWindow );
-    gWindow = NULL;
-
-    //Quit SDL subsystems
-    SDL_Quit();
-}
-
-void DrawRectIntro(int i,int j){
-	// printf("called %d   %d \n",i,j);
-	SDL_Rect filledRect = {i,j,15,15};// make rectangle structure
-	SDL_Rect InnerRect  ={i+2,j+2,11,11};
-	SDL_SetRenderDrawColor(gRenderer,0,0,0,0xFF);
-	SDL_RenderFillRect(gRenderer,&filledRect);
-
-	SDL_SetRenderDrawColor(gRenderer,0xFF,0xFF,0xFF,0xFF);
-	SDL_RenderFillRect(gRenderer,&InnerRect);
-
-	SDL_RenderPresent( gRenderer );
-	// SDL_UpdateWindowSurface( gWindow );
-}
-
-void DrawLifeGrid(Vector_Matrix Grid){
-	for (size_t i = 0; i < ROWS; i++) {
-		for (size_t j = 0; j < COLS; j++) {
-			SDL_Rect filledRect = {i*15,j*15,15,15};// make rectangle structure
-			SDL_Rect InnerRect  ={i*15+2,j*15+2,11,11};
-			if ( get<0>(Grid[i][j]) ){
-				SDL_SetRenderDrawColor(gRenderer,0xFF,0xFF,0xFF,0xFF);
-				SDL_RenderFillRect(gRenderer,&InnerRect);
-				SDL_SetRenderDrawColor(gRenderer,0,0,0,0xFF);
-				SDL_RenderFillRect(gRenderer,&filledRect);
-			}
-			else{
-				SDL_SetRenderDrawColor(gRenderer,0xFF,0xFF,0xFF,0xFF);
-				SDL_RenderFillRect(gRenderer,&InnerRect);
-			}
-		}
-	}
-	SDL_RenderPresent( gRenderer );
-}
 int main(int argc, char * argv[]){
 	// ########## Initialize the SDL graphic components ################
 	//
@@ -202,9 +62,9 @@ int main(int argc, char * argv[]){
 			}
 		}
 		//clear splash image
-		SDL_FillRect(gScreenSurface, NULL, 0xFFFFFF);
-		SDL_RenderPresent( gRenderer );
-		SDL_UpdateWindowSurface( gWindow );
+		// SDL_FillRect(gScreenSurface, NULL, 0xFFFFFF);
+		// SDL_RenderPresent( gRenderer );
+		// SDL_UpdateWindowSurface( gWindow );
 		//Create Renderer
 		gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED );
 //#########Intro################
