@@ -163,13 +163,13 @@ void DrawLifeGrid(Vector_Matrix Grid){
 			SDL_Rect filledRect = {i*15,j*15,15,15};// make rectangle structure
 			SDL_Rect InnerRect  ={i*15+2,j*15+2,11,11};
 			if ( get<0>(Grid[i][j]) ){
-				SDL_SetRenderDrawColor(gRenderer,0xFF,0xFF,0xFF,0xFF);
+				// SDL_SetRenderDrawColor(gRenderer,0xFF,0xFF,0xFF,0xFF);
+        // SDL_RenderFillRect(gRenderer,&filledRect);
+        SDL_SetRenderDrawColor(gRenderer,0x00,0x00,0xFF,0xFF);
 				SDL_RenderFillRect(gRenderer,&InnerRect);
-				SDL_SetRenderDrawColor(gRenderer,0,0,0,0xFF);
-				SDL_RenderFillRect(gRenderer,&filledRect);
 			}
 			else{
-				SDL_SetRenderDrawColor(gRenderer,0xFF,0xFF,0xFF,0xFF);
+				SDL_SetRenderDrawColor(gRenderer,0x00,0xFF,0xFF,0xFF);
 				SDL_RenderFillRect(gRenderer,&InnerRect);
 			}
 		}
